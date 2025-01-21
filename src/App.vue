@@ -9,6 +9,7 @@ const selectedBank = ref(null)
 const searchBranch = ref('')
 const isBranchDropdownOpen = ref(false)
 const selectedBranch = ref(null)
+const sectionKey = ref('')
 const highlightedIndex = ref(-1)
 const branchHighlightedIndex = ref(-1)
 const inputRef = ref(null)
@@ -51,8 +52,9 @@ const loadBankData = async () => {
         })
   
         return result
-      }, {})
+      }, {})      
     )
+    // console.log(bankData.value)
 
     if (route.params.bankCode && route.params.branchCode && route.params.branchName) {
       const bank = bankData.value.find(b => b.bankCode === route.params.bankCode)
@@ -73,12 +75,15 @@ const loadBankData = async () => {
 }
 
 const filteredBanks = computed(() => {
-  if (!searchBank.value.trim()) return bankData.value || []
+  
+  if (!searchBank.value) return bankData.value || []
+  
   const keyword = searchBank.value.trim()
   const filtered = bankData.value.filter(bank => 
     bank.bankName.includes(keyword) ||
     String(bank.bankCode).includes(keyword)
   )
+  console.log("Hi There",keyword,filtered)
   return filtered
 })
 
@@ -87,8 +92,7 @@ const filteredBranches = computed(() => {
   if (!searchBranch.value) return selectedBank.value.branches || []
   const keyword = searchBranch.value.trim()
   const filtered = selectedBank.value.branches.filter(branch => 
-    branch.branchName.includes(keyword) ||
-    String(branch.branchCode).includes(keyword)
+    branch.branchName.includes(keyword)
   )
   return filtered
 })
@@ -157,6 +161,8 @@ const handleKeyDown = (e) => {
         handleBankSelect(filteredBanks.value[highlightedIndex.value])
       }
       break
+    default:
+      break
   }
 }
 
@@ -182,6 +188,8 @@ const handleBranchKeyDown = (e) => {
       break
     case 'Escape':
       isBranchDropdownOpen.value = false
+      break
+    default:
       break
   }
 }
@@ -217,23 +225,23 @@ const copyBranchCode = () => {
     })
 }
 
-watch(route, (to) => {
-  if (to.params.bankCode && to.params.branchCode && to.params.branchName) {
-    const bank = bankData.value.find(b => b.bankCode === to.params.bankCode)
-    if (bank) {
-      selectedBank.value = bank
-      const branch = bank.branches.find(br => br.branchCode === to.params.branchCode && `${bank.bankName}-${br.branchName}` === to.params.branchName)
-      if (branch) {
-        selectedBranch.value = branch
-      }
-    }
-  } else {
-    selectedBank.value = null
-    selectedBranch.value = null
-    searchBank.value = ''
-    searchBranch.value = ''
-  }
-})
+// watch(route, (to) => {
+//   if (to.params.bankCode && to.params.branchCode && to.params.branchName) {
+//     const bank = bankData.value.find(b => b.bankCode === to.params.bankCode)
+//     if (bank) {
+//       selectedBank.value = bank
+//       const branch = bank.branches.find(br => br.branchCode === to.params.branchCode && `${bank.bankName}-${br.branchName}` === to.params.branchName)
+//       if (branch) {
+//         selectedBranch.value = branch
+//       }
+//     }
+//   } else {
+//     selectedBank.value = null
+//     selectedBranch.value = null
+//     searchBank.value = ''
+//     searchBranch.value = ''
+//   }
+// })
 
 onMounted(() => {
   loadBankData()
@@ -272,12 +280,16 @@ onUnmounted(() => {
           >
             <li
               v-for="(bank, index) in filteredBanks"
-              :key="bank.bankCode"
+              v-if="filteredBanks.length > 0"
+              :key="filteredBanks.length"
               @click="handleBankSelect(bank)"
               class="cursor-pointer hover:bg-blue-100 px-2 py-1 h-fit"
               :class="{ 'bg-blue-100': index === highlightedIndex }"
             >
               {{ bank?.bankCode }} {{ bank?.bankName }}
+            </li>
+            <li v-else class="px-2 py-1 text-gray-500">
+              沒有找到符合的銀行
             </li>
           </ul>
         </div>
@@ -304,12 +316,15 @@ onUnmounted(() => {
           >
             <li
               v-for="(branch, index) in filteredBranches"
-              :key="branch.branchCode"
+              :key="filteredBranches.length"
               class="cursor-pointer hover:bg-blue-100 px-2 py-1"
               :class="{ 'bg-blue-100': index === branchHighlightedIndex }"
               @click="handleBranchSelect(branch)"
             >
               {{ branch?.branchName }}
+            </li>
+            <li v-if="isBranchDropdownOpen && filteredBranches.length === 0" class="px-2 py-1 text-gray-500">
+              沒有找到符合的分行
             </li>
           </ul>
         </div>
