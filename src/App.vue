@@ -16,6 +16,10 @@ const inputRef = ref(null)
 const dropdownRef = ref(null)
 const branchInputRef = ref(null)
 const branchDropdownRef = ref(null)
+const didSelectBank = ref(false)
+const didSelectBranch = ref(false)
+const oldSearchBank = ref('')
+const oldSearchBranch = ref('')
 
 const route = useRoute()
 const router = useRouter()
@@ -95,11 +99,15 @@ const filteredBranches = computed(() => {
 })
 
 const handleInputClick = () => {
+  didSelectBank.value = false
+  oldSearchBank.value = searchBank.value
   isDropdownOpen.value = true
   if (selectedBank.value) return searchBank.value = null
 }
 
 const handleBranchInputClick = () => {
+  didSelectBranch.value = false
+  oldSearchBranch.value = searchBranch.value
   if (selectedBank.value) {
     isBranchDropdownOpen.value = true
     searchBranch.value = '' 
@@ -107,6 +115,7 @@ const handleBranchInputClick = () => {
 }
 
 const handleBankSelect = (bank) => {
+  didSelectBank.value = true
   selectedBank.value = bank
   selectedBranch.value = null
   searchBank.value = `${bank.bankCode} ${bank.bankName}`
@@ -115,6 +124,7 @@ const handleBankSelect = (bank) => {
 }
 
 const handleBranchSelect = (branch) => {
+  didSelectBranch.value = true
   selectedBranch.value = branch
   searchBranch.value = branch.branchName
   isBranchDropdownOpen.value = false
@@ -183,9 +193,15 @@ const handleBranchKeyDown = (e) => {
 const handleClickOutside = (e) => {
   if (dropdownRef.value && !dropdownRef.value.contains(e.target) && inputRef.value && !inputRef.value.contains(e.target)) {
     isDropdownOpen.value = false
+    if (!didSelectBank.value) {
+      searchBank.value = oldSearchBank.value
+    }
   }
   if (branchDropdownRef.value && !branchDropdownRef.value.contains(e.target) && branchInputRef.value && !branchInputRef.value.contains(e.target)) {
     isBranchDropdownOpen.value = false
+    if (!didSelectBranch.value) {
+      searchBranch.value = oldSearchBranch.value
+    }
   }
 }
 
@@ -280,7 +296,7 @@ onUnmounted(() => {
           <ul
             v-show="isBranchDropdownOpen"
             ref="branchDropdownRef"
-            class="absolute top-3/4 left-0 right-0 bg-white border border-zinc-400 rounded divide-y divide-dotted divide-zinc-400 shadow-lg max-h-64 overflow-y-auto z-10"
+            class="absolute top-[70.2px] sm:top-3/4 left-0 right-0 bg-white border border-zinc-400 rounded divide-y divide-dotted divide-zinc-400 shadow-lg max-h-64 overflow-y-auto z-10"
           >
             <li
               v-for="(branch, index) in filteredBranches"
