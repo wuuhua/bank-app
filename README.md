@@ -1,29 +1,36 @@
-# bank-app
+# 台灣銀行代碼查詢小工具
 
-This template should help get you started developing with Vue 3 in Vite.
+這是一個查詢台灣銀行各分行代碼的小工具，
+資料來源為 [政府開放平台](https://data.gov.tw/dataset/6041) 於 2024-12-12 更新版本
 
-## Recommended IDE Setup
+可透過關鍵字搜尋或下拉選單尋找銀行及分行
+方便快速獲得需要的資訊，還可以透過網址分享已查詢到的頁面內容！
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 專案技術
 
-## Customize configuration
+- vue 3.5.13
+- vue-router 4.5.0
+- tailwindcss 3.4.17
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+## 建立專案
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### 運行開發專案
 
 ```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
+### 打包部屬
 
 ```sh
 npm run build
 ```
+
+## 資料來源位置
+
+- Public
+  - twbank.json
