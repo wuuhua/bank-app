@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const bankData = ref([])
@@ -26,7 +26,6 @@ const loadBankData = async () => {
     const data = await response.json()
     bankData.value = Object.values(
       data.reduce((result, item) => {
-        // 生成銀行分組鍵（以總機構代號和bankName分組）
         const bankMatch = item.機構名稱.match(/^(.+?(銀行|辦事處|信用合作社))/) 
         const bankName = bankMatch ? bankMatch[1] : "未知機構"
         const branchName = item.機構名稱.replace(bankName, "").trim() 
@@ -54,7 +53,6 @@ const loadBankData = async () => {
         return result
       }, {})      
     )
-    // console.log(bankData.value)
 
     if (route.params.bankCode && route.params.branchCode && route.params.branchName) {
       const bank = bankData.value.find(b => b.bankCode === route.params.bankCode)
@@ -83,7 +81,6 @@ const filteredBanks = computed(() => {
     bank.bankName.includes(keyword) ||
     String(bank.bankCode).includes(keyword)
   )
-  console.log("Hi There",keyword,filtered)
   return filtered
 })
 
@@ -99,23 +96,13 @@ const filteredBranches = computed(() => {
 
 const handleInputClick = () => {
   isDropdownOpen.value = true
-  if (selectedBank.value) {
-    // searchBank.value = `${selectedBank.value.bankCode} ${selectedBank.value.bankName}`
-    searchBank.value = null
-    // selectedBank.value = null
-  }
+  if (selectedBank.value) return searchBank.value = null
 }
 
 const handleBranchInputClick = () => {
   if (selectedBank.value) {
     isBranchDropdownOpen.value = true
-    // if (selectedBranch.value) {
-      // searchBranch.value = selectedBranch.value.branchName
-      // selectedBranch.value = null
-    // } else {
-      searchBranch.value = '' 
-    // }
-    console.log('Branch dropdown opened. searchBranch reset to:', searchBranch.value)
+    searchBranch.value = '' 
   }
 }
 
@@ -125,7 +112,6 @@ const handleBankSelect = (bank) => {
   searchBank.value = `${bank.bankCode} ${bank.bankName}`
   searchBranch.value = null
   isDropdownOpen.value = false
-
 }
 
 const handleBranchSelect = (branch) => {
@@ -153,13 +139,13 @@ const handleKeyDown = (e) => {
     case 'ArrowUp':
       highlightedIndex.value = Math.max(highlightedIndex.value - 1, 0)
       break
-    case 'Escape':
-      isDropdownOpen.value = false
-      break
     case 'Enter':
       if (highlightedIndex.value >= 0) {
         handleBankSelect(filteredBanks.value[highlightedIndex.value])
       }
+      break
+      case 'Escape':
+      isDropdownOpen.value = false
       break
     default:
       break
@@ -225,24 +211,6 @@ const copyBranchCode = () => {
     })
 }
 
-// watch(route, (to) => {
-//   if (to.params.bankCode && to.params.branchCode && to.params.branchName) {
-//     const bank = bankData.value.find(b => b.bankCode === to.params.bankCode)
-//     if (bank) {
-//       selectedBank.value = bank
-//       const branch = bank.branches.find(br => br.branchCode === to.params.branchCode && `${bank.bankName}-${br.branchName}` === to.params.branchName)
-//       if (branch) {
-//         selectedBranch.value = branch
-//       }
-//     }
-//   } else {
-//     selectedBank.value = null
-//     selectedBranch.value = null
-//     searchBank.value = ''
-//     searchBranch.value = ''
-//   }
-// })
-
 onMounted(() => {
   loadBankData()
   document.addEventListener('click', handleClickOutside)
@@ -254,10 +222,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <main class="container mx-auto my-2">
+  <main class="container mx-auto my-2 min-w-28">
     <section class="mx-2 sm:mx-0 px-2">
       <h1 class="text-4xl sm:text-5xl font-thin my-2 -ml-1">台灣銀行代碼查詢</h1>
-      <div class="flex gap-2 mt-2">
+      <div class="flex flex-col sm:flex-row gap-2 mt-2">
         <div class="flex flex-col relative">
           <label for="bank-name" class="font-bold text-gray-700">銀行名稱</label>
           <input
@@ -281,7 +249,7 @@ onUnmounted(() => {
             <li
               v-for="(bank, index) in filteredBanks"
               v-if="filteredBanks.length > 0"
-              :key="filteredBanks.length"
+              :key="searchBank"
               @click="handleBankSelect(bank)"
               class="cursor-pointer hover:bg-blue-100 px-2 py-1 h-fit"
               :class="{ 'bg-blue-100': index === highlightedIndex }"
@@ -316,7 +284,7 @@ onUnmounted(() => {
           >
             <li
               v-for="(branch, index) in filteredBranches"
-              :key="filteredBranches.length"
+              :key="searchBranch"
               class="cursor-pointer hover:bg-blue-100 px-2 py-1"
               :class="{ 'bg-blue-100': index === branchHighlightedIndex }"
               @click="handleBranchSelect(branch)"
@@ -331,7 +299,7 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <section v-if="selectedBank && selectedBranch" :key="sectionKey" class="mt-4 sm:mt-2">
+    <section v-if="selectedBank && selectedBranch" :key="sectionKey" class="mt-4 sm:mt-2 min-w-fit">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end px-2 py-2 bg-green-50 rounded border border-dotted border-gray-700">
         <div>
           <h2 class="text-3xl mt-1 mb-2">{{ selectedBank?.bankName }}({{ selectedBank?.bankCode }}){{ selectedBranch?.branchName }}</h2>
