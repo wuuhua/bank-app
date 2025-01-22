@@ -1,5 +1,7 @@
 # 台灣銀行代碼查詢小工具
 
+https://bank-app-9u14.onrender.com  
+
 這是一個查詢台灣銀行各分行代碼的小工具，
 資料來源為 [政府開放平台](https://data.gov.tw/dataset/6041) 於 2024-12-12 更新版本
 
@@ -24,7 +26,7 @@ npm install
 npm run dev
 ```
 
-### 打包部屬
+### 打包部署
 
 ```sh
 npm run build
